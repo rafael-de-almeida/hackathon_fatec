@@ -1,6 +1,6 @@
 import { Fragment, useState, type FormEvent } from "react";
 import PerguntaDissertativa from "../../components/perguntas/PerguntaDissertativa/PerguntaDissertativa";
-import PerguntaLikert from "../../components/perguntas/PerguntaLikert/PerguntaLikert";
+import {PerguntaLikert} from "../../components/perguntas/PerguntaLikert/PerguntaLikert";
 import { Navegacao } from "../../components/layout/Navegacao/Navegacao";
 import ChatGemini from "../../components/outros/ChatGemini/ChatGemini";
 import "./Testes.css";
