@@ -1,0 +1,36 @@
+.analise-container main {
+  max-width: 1200px;
+  margin: 100px auto;
+  padding: 20px;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #467FF7;
+}
+
+.info-card, .grafico-card, .ia-card {
+  margin-bottom: 30px;
+}
+
+.descricao-ia {
+  color: #8b8b8b;
+  margin-bottom: 15px;
+}
+
+.resposta-ia {
+  background-color: #10194a;
+  border-left: 4px solid #467FF7;
+  padding: 15px;
+  margin-top: 20px;
+  border-radius: 10px;
+  color: #e0e0e0;
+}
+
+.resposta-ia h4 {
+  color: #467FF7;
+  margin-bottom: 10px;
+}

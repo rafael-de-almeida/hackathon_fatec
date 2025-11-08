@@ -1,0 +1,23 @@
+:root {
+  --rosa-grafico: rgba(255, 200, 200, 0.5);
+  --azul-grafico: rgba(200, 200, 255, 0.5);
+  --verde-grafico: rgba(200, 255, 200, 0.5);
+  --amarelo-grafico: rgba(255, 255, 200, 0.5);
+}
+
+.grafico-cartesiano {
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  display: block;
+}
+
+.grafico-tooltip {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  pointer-events: none;
+  white-space: nowrap;
+}

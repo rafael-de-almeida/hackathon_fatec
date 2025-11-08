@@ -1,0 +1,9 @@
+th, td {
+    background-color: white;
+    padding: 8px;
+    color: black;
+}
+
+table {
+    margin: 16px;
+}
