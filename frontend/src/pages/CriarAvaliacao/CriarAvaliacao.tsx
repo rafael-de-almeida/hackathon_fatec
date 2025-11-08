@@ -1,178 +1,204 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
+import { Trash2, Plus } from "lucide-react"
+import { PerguntaLikert } from "@/components/perguntas/PerguntaLikert/PerguntaLikert"
 import { Navegacao } from "../../components/layout/Navegacao/Navegacao"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Trash2, Plus } from "lucide-react";
 
-type Campo = {
-  id: string;
-  tipo: "dissertativa" | "likert" | "texto" | "selecao";
-  pergunta: string;
-  opcoes?: string[];
-};
+type Pergunta = {
+  id: string
+  texto: string
+  categoria: "Atitude" | "Desempenho" | "Preparo" | ""
+}
 
-export default function FormBuilder() {
-  const [campos, setCampos] = useState<Campo[]>([]);
-  const [nomeFormulario, setNomeFormulario] = useState("Novo Formulário");
+export default function FormBuilderLikert() {
+  const [perguntas, setPerguntas] = useState<Pergunta[]>([])
+  const [titulo, setTitulo] = useState("Avaliação de Liderança Situacional")
+  const [descricao, setDescricao] = useState("Avaliação para identificar o perfil de liderança predominante.")
+  const [criadoPor, setCriadoPor] = useState("Val Fuga")
+  const [dataLimite, setDataLimite] = useState("2025-12-01")
 
-  const adicionarCampo = (tipo: Campo["tipo"]) => {
-    const novo: Campo = {
+  const adicionarPergunta = () => {
+    const nova: Pergunta = {
       id: crypto.randomUUID(),
-      tipo,
-      pergunta: "",
-      opcoes: tipo === "selecao" || tipo === "likert" ? ["Opção 1", "Opção 2"] : [],
-    };
-    setCampos([...campos, novo]);
-  };
+      texto: "",
+      categoria: "",
+    }
+    setPerguntas([...perguntas, nova])
+  }
 
-  const atualizarCampo = (id: string, campoAtualizado: Partial<Campo>) => {
-    setCampos(campos.map(c => (c.id === id ? { ...c, ...campoAtualizado } : c)));
-  };
+  const atualizarPergunta = (id: string, campo: Partial<Pergunta>) => {
+    setPerguntas(perguntas.map((p) => (p.id === id ? { ...p, ...campo } : p)))
+  }
 
-  const removerCampo = (id: string) => {
-    setCampos(campos.filter(c => c.id !== id));
-  };
+  const removerPergunta = (id: string) => {
+    setPerguntas(perguntas.filter((p) => p.id !== id))
+  }
+
+  const montarJSON = () => {
+    const json = {
+      titulo,
+      descricao,
+      criadoPor,
+      criadoEm: new Date().toISOString().split("T")[0],
+      dataLimite,
+      quantidadePerguntas: perguntas.length,
+      perguntas: perguntas.map((p, i) => ({
+        id: i + 1,
+        enunciado: p.texto,
+        opcao: "",
+      })),
+    }
+    return json
+  }
 
   const exportarJSON = () => {
-    const json = JSON.stringify({ nomeFormulario, campos }, null, 2);
-    console.log(json);
-    alert("JSON do formulário exportado no console!");
-  };
+    const json = montarJSON()
+    console.log("JSON exportado:", json)
+    alert("JSON exportado! Veja no console.")
+  }
 
-  return (<div>
-    <Navegacao />
-    <div className="min-h-screen bg-gray-50 p-10">
+  const enviarParaAPI = async () => {
+    const json = montarJSON()
+    try {
+      const resposta = await fetch("http://localhost:8080/api/avaliacoes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(json),
+      })
+      if (resposta.ok) {
+        alert("Formulário enviado com sucesso!")
+      } else {
+        alert("Erro ao enviar formulário.")
+      }
+    } catch (erro) {
+      console.error(erro)
+      alert("Falha na conexão com a API.")
+    }
+  }
 
-      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        {/* Painel lateral */}
-        <Card className="md:col-span-1 shadow-sm">
-          <CardHeader>
-            <CardTitle>Ferramentas</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Button onClick={() => adicionarCampo("dissertativa")} className="w-full" variant="outline">
-              <Plus className="w-4 h-4 mr-2" /> Pergunta Dissertativa
-            </Button>
-            <Button onClick={() => adicionarCampo("likert")} className="w-full" variant="outline">
-              <Plus className="w-4 h-4 mr-2" /> Pergunta Likert
-            </Button>
-            <Button onClick={() => adicionarCampo("texto")} className="w-full" variant="outline">
-              <Plus className="w-4 h-4 mr-2" /> Campo de Texto
-            </Button>
-            <Button onClick={() => adicionarCampo("selecao")} className="w-full" variant="outline">
-              <Plus className="w-4 h-4 mr-2" /> Seleção
-            </Button>
-            <Separator />
-            <Button onClick={exportarJSON} className="w-full">
-              Exportar JSON
-            </Button>
-          </CardContent>
-        </Card>
+  return (
+    <div>
+      <Navegacao />
+      <div className="min-h-screen bg-gray-50 p-10">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          {/* Painel lateral */}
+          <Card className="md:col-span-1 shadow-sm">
+            <CardHeader>
+              <CardTitle>Ferramentas</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button onClick={adicionarPergunta} className="w-full" variant="outline">
+                <Plus className="w-4 h-4 mr-2" /> Adicionar Pergunta Likert
+              </Button>
+              <Separator />
+              <Button onClick={exportarJSON} className="w-full" variant="secondary">
+                Visualizar JSON
+              </Button>
+              <Button onClick={enviarParaAPI} className="w-full">
+                Enviar para API
+              </Button>
+            </CardContent>
+          </Card>
 
-        {/* Área de edição */}
-        <Card className="md:col-span-2 shadow-md">
-          <CardHeader>
-            <CardTitle>Editor de Formulário</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <Label htmlFor="nome">Nome do Formulário</Label>
-              <Input
-                id="nome"
-                value={nomeFormulario}
-                onChange={e => setNomeFormulario(e.target.value)}
-              />
-            </div>
-
-            <Separator />
-
-            {campos.map((campo) => (
-              <div
-                key={campo.id}
-                className="border rounded-xl p-4 space-y-3 bg-white shadow-sm relative"
-              >
-                <button
-                  type="button"
-                  onClick={() => removerCampo(campo.id)}
-                  className="absolute right-3 top-3 text-gray-400 hover:text-red-500"
-                >
-                  <Trash2 size={16} />
-                </button>
-
-                <Select
-                  value={campo.tipo}
-                  onValueChange={(v) =>
-                    atualizarCampo(campo.id, { tipo: v as Campo["tipo"] })
-                  }
-                >
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Tipo de campo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="dissertativa">Dissertativa</SelectItem>
-                    <SelectItem value="likert">Likert</SelectItem>
-                    <SelectItem value="texto">Texto</SelectItem>
-                    <SelectItem value="selecao">Seleção</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <div>
-                  <Label>Pergunta</Label>
-                  <Input
-                    value={campo.pergunta}
-                    onChange={(e) =>
-                      atualizarCampo(campo.id, { pergunta: e.target.value })
-                    }
-                    placeholder="Digite a pergunta..."
-                  />
-                </div>
-
-                {(campo.tipo === "likert" || campo.tipo === "selecao") && (
-                  <div>
-                    <Label>Opções</Label>
-                    {campo.opcoes?.map((op, i) => (
-                      <Input
-                        key={i}
-                        value={op}
-                        onChange={(e) => {
-                          const novas = [...(campo.opcoes || [])];
-                          novas[i] = e.target.value;
-                          atualizarCampo(campo.id, { opcoes: novas });
-                        }}
-                        className="mt-1"
-                      />
-                    ))}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        atualizarCampo(campo.id, {
-                          opcoes: [...(campo.opcoes || []), "Nova opção"],
-                        })
-                      }
-                      className="mt-2"
-                    >
-                      <Plus size={14} className="mr-2" /> Adicionar opção
-                    </Button>
-                  </div>
-                )}
+          {/* Área de edição */}
+          <Card className="md:col-span-2 shadow-md">
+            <CardHeader>
+              <CardTitle>Editor de Formulário</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <Label>Título</Label>
+                <Input value={titulo} onChange={(e) => setTitulo(e.target.value)} />
               </div>
-            ))}
 
-            {campos.length === 0 && (
-              <p className="text-gray-500 text-center italic">
-                Nenhum campo adicionado ainda.
-              </p>
-            )}
-          </CardContent>
-        </Card>
+              <div>
+                <Label>Descrição</Label>
+                <Input value={descricao} onChange={(e) => setDescricao(e.target.value)} />
+              </div>
+
+              <div>
+                <Label>Criado Por</Label>
+                <Input value={criadoPor} onChange={(e) => setCriadoPor(e.target.value)} />
+              </div>
+
+              <div>
+                <Label>Data Limite</Label>
+                <Input
+                  type="date"
+                  value={dataLimite}
+                  onChange={(e) => setDataLimite(e.target.value)}
+                />
+              </div>
+
+              <Separator />
+
+              {perguntas.map((p, i) => (
+                <div key={p.id} className="border rounded-xl p-4 space-y-3 bg-white shadow-sm relative">
+                  <button
+                    type="button"
+                    onClick={() => removerPergunta(p.id)}
+                    className="absolute right-3 top-3 text-gray-400 hover:text-red-500"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+
+                  <p className="text-sm text-gray-500 font-semibold">Pergunta {i + 1}</p>
+
+                  <div>
+                    <Label>Pergunta</Label>
+                    <Input
+                      value={p.texto}
+                      onChange={(e) =>
+                        atualizarPergunta(p.id, { texto: e.target.value })
+                      }
+                      placeholder="Digite o enunciado da pergunta..."
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Categoria</Label>
+                    <Select
+                      value={p.categoria}
+                      onValueChange={(v) =>
+                        atualizarPergunta(p.id, { categoria: v as Pergunta["categoria"] })
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Selecione uma categoria" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Atitude">Atitude</SelectItem>
+                        <SelectItem value="Desempenho">Desempenho</SelectItem>
+                        <SelectItem value="Preparo">Preparo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="mt-4">
+                    <PerguntaLikert
+                      name={`pergunta-${p.id}`}
+                      question={p.texto || "Pergunta de exemplo"}
+                      disabled={true}
+                    />
+                  </div>
+                </div>
+              ))}
+
+              {perguntas.length === 0 && (
+                <p className="text-gray-500 text-center italic">
+                  Nenhuma pergunta adicionada ainda.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
-    </div>
-  );
-}
+  )
+}  
