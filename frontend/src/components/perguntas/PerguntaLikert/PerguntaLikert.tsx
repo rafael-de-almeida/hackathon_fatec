@@ -1,110 +1,66 @@
-import React from "react";
 
-type Option = {
-  value: string;   // valor retornado (ex: "5", "4", ...)
-  label: string;   // texto exibido (ex: "Concordo totalmente")
-};
+import { useState } from "react"
 
-type Props = {
-  name: string;
-  question: string;
-  value?: string; // controlled
-  defaultValue?: string; // uncontrolled initial
-  onChange?: (value: string) => void;
-  options?: Option[]; // padrão 5 pontos clássico
-  orientation?: "horizontal" | "vertical";
-  required?: boolean;
-  className?: string;
-};
+interface PerguntaLikertProps {
+  name: string
+  question: string
+  onChange?: (valor: number) => void
+  orientation?: "horizontal" | "vertical"
+  disabled?: boolean
+}
 
-export const PerguntaLikert: React.FC<Props> = ({
+export function PerguntaLikert({
   name,
   question,
-  value,
-  defaultValue,
   onChange,
-  options,
   orientation = "horizontal",
-  required = false,
-  className,
-}) => {
-  const defaultOptions: Option[] = [
-    { value: "5", label: "Concordo totalmente" },
-    { value: "4", label: "Concordo parcialmente" },
-    { value: "3", label: "Nem concordo nem discordo" },
-    { value: "2", label: "Discordo parcialmente" },
-    { value: "1", label: "Discordo totalmente" },
-  ];
+  disabled = false,
+}: PerguntaLikertProps) {
+  const [resposta, setResposta] = useState<number | null>(null)
 
-  const opts = options ?? defaultOptions;
-
-  // controlado vs não-controlado: se value definido, componente é controlado
-  const [internal, setInternal] = React.useState<string | undefined>(defaultValue);
-
-  React.useEffect(() => {
-    if (value !== undefined) return;
-    setInternal(defaultValue);
-  }, [defaultValue, value]);
-
-  const selected = value !== undefined ? value : internal;
-
-  const handleChange = (v: string) => {
-    if (value === undefined) setInternal(v);
-    onChange?.(v);
-  };
+  const opcoes = [
+    { valor: 1, texto: "Discordo totalmente" },
+    { valor: 2, texto: "Discordo parcialmente" },
+    { valor: 3, texto: "Neutro" },
+    { valor: 4, texto: "Concordo parcialmente" },
+    { valor: 5, texto: "Concordo totalmente" },
+  ]
 
   return (
-    <fieldset
-      className={className}
-      style={{
-        border: "none",
-        padding: 0,
-        margin: 0,
-      }}
-    >
-      <legend style={{ fontWeight: 600, marginBottom: 8 }}>{question}{required ? " *" : ""}</legend>
-
+    <div className="space-y-2">
+      <p className="font-medium text-gray-800">{question}</p>
       <div
-        role="radiogroup"
-        aria-label={question}
-        style={{
-          display: orientation === "horizontal" ? "flex" : "block",
-          gap: 12,
-          alignItems: "center",
-        }}
+        className={`flex ${
+          orientation === "horizontal" ? "flex-row gap-4" : "flex-col gap-2"
+        }`}
       >
-        {opts.map((opt) => {
-          const id = `${name}-${opt.value}`;
-          return (
-            <label
-              key={opt.value}
-              htmlFor={id}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                cursor: "pointer",
-                minWidth: orientation === "horizontal" ? 120 : undefined,
-                padding: 6,
+        {opcoes.map((op) => (
+          <label
+            key={op.valor}
+            className={`flex items-center gap-2 cursor-pointer ${
+              resposta === op.valor
+                ? "text-blue-700 font-semibold"
+                : "text-gray-600"
+            } ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
+          >
+            <input
+              type="radio"
+              name={name}
+              value={op.valor}
+              checked={resposta === op.valor}
+              disabled={disabled} 
+              onChange={() => {
+                if (disabled) return
+                setResposta(op.valor)
+                onChange?.(op.valor)
               }}
-            >
-              <input
-                id={id}
-                name={name}
-                type="radio"
-                value={opt.value}
-                checked={selected === opt.value}
-                onChange={() => handleChange(opt.value)}
-                style={{ marginBottom: 6 }}
-                required={required && opts[0].value === opt.value} // required only once in group
-              />
-              <span style={{ fontSize: 13, textAlign: "center" }}>{opt.label}</span>
-            </label>
-          );
-        })}
+              className="accent-blue-700"
+            />
+            <span>{op.texto}</span>
+          </label>
+        ))}
       </div>
-    </fieldset>
-  );
-};
+    </div>
+  )
+}
 
-export default PerguntaLikert;
