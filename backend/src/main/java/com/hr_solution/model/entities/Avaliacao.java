@@ -1,5 +1,6 @@
 package com.hr_solution.model.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -50,37 +51,18 @@ public class Avaliacao {
     @Column(nullable = false)
     private Integer quantidadePerguntas;
 
-    //Eixos do Perfil
 
-    //Máximo atingível no eixo da Atitude
-    @Column(nullable = true)
-    private Integer EixoMaxAtitude;
-
-    @Column(nullable = true)
-    private Integer EixoMaxCapacidade;
-
-    //Eixos da Liderança
-
-    //Máximo atingível no eixo da Liderança Comandante
-    @Column(nullable = true)
-    private Integer LiderancaComandanteTotal;
-
-    @Column(nullable = true)
-    private Integer LiderancaTreinadorTotal;
-    
-    @Column(nullable = true)
-    private Integer LiderancaOrientadorTotal;
-
-    @Column(nullable = true)
-    private Integer LiderancaDesafiadorTotal;
 
     @OneToMany(
-        mappedBy = "avaliacao",
-        cascade = CascadeType.ALL,
-        orphanRemoval = true,
-        fetch = FetchType.LAZY
+            mappedBy = "avaliacao",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
     )
+    @JsonManagedReference
     private List<Pergunta> perguntas = new ArrayList<>();
+
+
 
     public void adicionarPergunta(Pergunta p) {
         perguntas.add(p);
