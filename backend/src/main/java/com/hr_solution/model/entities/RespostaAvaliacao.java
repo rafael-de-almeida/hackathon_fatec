@@ -1,5 +1,7 @@
 package com.hr_solution.model.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -53,10 +55,13 @@ public class RespostaAvaliacao {
 
     @ManyToOne
     @JoinColumn(name = "avaliacao_id")
+    @JsonBackReference
     private Avaliacao avaliacao;
 
     @OneToMany(mappedBy = "respostaAvaliacao", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<RespostaPergunta> respostas;
+
 
     public void adicionarResposta(RespostaPergunta r) {
         respostas.add(r);

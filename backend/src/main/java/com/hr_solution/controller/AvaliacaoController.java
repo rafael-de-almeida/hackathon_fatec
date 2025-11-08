@@ -29,6 +29,10 @@ public class AvaliacaoController {
 
     @PostMapping
     public Avaliacao criar(@RequestBody Avaliacao avaliacao) {
+        avaliacao.setId(null);
+        if (avaliacao.getPerguntas() != null) {
+            avaliacao.getPerguntas().forEach(p -> p.setId(null));
+        }
         return avaliacaoService.salvar(avaliacao);
     }
 
